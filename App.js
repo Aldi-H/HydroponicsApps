@@ -33,7 +33,7 @@ const App = () => {
         <ApplicationProvider {...eva} theme={eva[theme]}>
           <NavigationContainer>
             <Stack.Navigator>
-              <Stack.Screen name="Home" component={Home} />
+              <Stack.Screen name="IoT Monitor and Control" component={Home} />
             </Stack.Navigator>
           </NavigationContainer>
         </ApplicationProvider>
