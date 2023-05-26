@@ -1,82 +1,125 @@
 import * as React from 'react';
-import { Layout, Text } from '@ui-kitten/components';
-import { Dimensions, ScrollView, View, StyleSheet } from 'react-native';
+import { Text } from '@ui-kitten/components';
+import { Dimensions, View, StyleSheet } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 
-const LineChartComponent = () => {
-  const data1 = [
-    { value: 70 },
-    { value: 36 },
-    { value: 50 },
-    { value: 40 },
-    { value: 18 },
-    { value: 38 },
-  ];
-  const data2 = [
-    { value: 50 },
-    { value: 10 },
-    { value: 45 },
-    { value: 30 },
-    { value: 45 },
-    { value: 18 },
-  ];
+const customLabel = val => {
   return (
-    <View>
+    <View style={styles.customLabelContainer}>
+      <Text style={styles.customLabelText} category="label">
+        {val}
+      </Text>
+    </View>
+  );
+};
+
+const LineChartComponent = ({ chart, records }) => {
+  const ppmData = records.map(record => {
+    const date = new Date(record.createdAt);
+    return {
+      value: record.ppm,
+      dataPointText: record.ppm,
+      labelComponent: () =>
+        customLabel(`
+          ${date.getHours()}:${date.getMinutes()} \n  ${date.getDate()}/${date.getMonth()}/${date
+          .getFullYear()
+          .toString()
+          .substring(2)}`),
+    };
+  });
+
+  const tempData = records.map(record => {
+    const date = new Date(record.createdAt);
+    return {
+      value: record.temperature,
+      dataPointText: record.temperature,
+      labelComponent: () =>
+        customLabel(`
+          ${date.getHours()}:${date.getMinutes()} \n  ${date.getDate()}/${date.getMonth()}/${date
+          .getFullYear()
+          .toString()
+          .substring(2)}`),
+    };
+  });
+
+  const lineData = [
+    {
+      dataPointText: 1278,
+      value: 1278,
+      labelComponent: () => customLabel('10:00 \n 20/05/23'),
+    },
+    {
+      dataPointText: 876,
+      value: 876,
+      labelComponent: () => customLabel('10:00 \n 20/05/23'),
+    },
+    { dataPointText: 900, value: 900 },
+    { dataPointText: 1435, value: 1435 },
+    { dataPointText: 1278, value: 1278 },
+    { dataPointText: 543, value: 543 },
+  ];
+
+  const lineDataSuhu = [
+    {
+      dataPointText: 27,
+      value: 27,
+      labelComponent: () => customLabel('10:00 \n 20/05/23'),
+    },
+    {
+      dataPointText: 25,
+      value: 25,
+      labelComponent: () => customLabel('10:00 \n 20/05/23'),
+    },
+    { dataPointText: 26, value: 26 },
+    { dataPointText: 24, value: 24 },
+    { dataPointText: 27, value: 27 },
+    { dataPointText: 23, value: 23 },
+  ];
+
+  return (
+    <View style={styles.chartContainer}>
       <LineChart
-        areaChart
+        width={Dimensions.get('window').width - 100}
         curved
-        data={data1}
-        data2={data2}
-        hideDataPoints
-        spacing={68}
-        color1="#8a56ce"
-        color2="#56acce"
-        startFillColor1="#8a56ce"
-        startFillColor2="#56acce"
-        endFillColor1="#8a56ce"
-        endFillColor2="#56acce"
-        startOpacity={0.9}
-        endOpacity={0.2}
-        initialSpacing={0}
-        noOfSections={4}
-        yAxisColor="white"
-        yAxisThickness={0}
-        rulesType="solid"
-        rulesColor="gray"
-        yAxisTextStyle={{ color: 'gray' }}
-        yAxisLabelSuffix="%"
+        rotateLabel
+        // hideRules
+        hideYAxisText
+        height={150}
+        data={chart === 'konsentrasi' ? ppmData : tempData}
+        initialSpacing={30}
+        noOfSections={5}
+        thickness={2}
+        dataPointsHeight={6}
+        dataPointsWidth={6}
+        rulesColor="lightgray"
+        yAxisColor="lightgray"
         xAxisColor="lightgray"
+        xAxisThickness={0}
+        yAxisLabelTexts={styles.pointerLabelText}
+        yAxisTextStyle={styles.yAxisTextStyle}
+        yAxisThickness={0}
+        textColor1="green"
+        color1="lightblue"
+        dataPointsColor1="skyblue"
+        startFillColor="rgba(20,105,81,0.3)"
+        endFillColor="rgba(20,85,81,0.01)"
+        startOpacity={0.8}
+        endOpacity={0.3}
         pointerConfig={{
-          pointerStripUptoDataPoint: true,
-          pointerStripColor: 'lightgray',
-          pointerStripWidth: 2,
-          strokeDashArray: [2, 5],
+          pointerStripHeight: 150,
+          pointerStripColor: 'lightblue',
           pointerColor: 'lightgray',
-          radius: 4,
+          activatePointersOnLongPress: true,
+          // autoAdjustPointerLabelPosition: false,
           pointerLabelWidth: 100,
-          pointerLabelHeight: 120,
+          pointerLabelHeight: 50,
+          // eslint-disable-next-line react/no-unstable-nested-components
           pointerLabelComponent: items => {
             return (
-              <View
-                style={{
-                  height: 120,
-                  width: 100,
-                  backgroundColor: '#282C3E',
-                  borderRadius: 4,
-                  justifyContent: 'center',
-                  paddingLeft: 16,
-                }}>
-                <Text style={{ color: 'lightgray', fontSize: 12 }}>{2018}</Text>
-                <Text style={{ color: 'white', fontWeight: 'bold' }}>
-                  {items[0].value}
-                </Text>
-                <Text
-                  style={{ color: 'lightgray', fontSize: 12, marginTop: 12 }}>
-                  {2019}
-                </Text>
-                <Text style={{ color: 'white', fontWeight: 'bold' }}>
-                  {items[1].value}
-                </Text>
+              <View style={styles.pointerLabelContainer}>
+                <Text style={styles.pointerLabelText}>{`${items[0].value}${
+                  chart === 'konsentrasi' ? 'ppm' : '°C'
+                }`}</Text>
               </View>
             );
           },
@@ -87,9 +130,31 @@ const LineChartComponent = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
+  customLabelContainer: {
+    width: 60,
+    marginLeft: 7,
+  },
+  customLabelText: {
+    color: 'lightgray',
+  },
+  chartContainer: {
+    // paddingLeft: 20,
+    paddingVertical: 30,
+  },
+  yAxisTextStyle: {
+    color: 'lightgray',
+    fontSize: 10,
+  },
+  pointerLabelContainer: {
+    paddingHorizontal: 5,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: 'lightblue',
+  },
+  pointerLabelText: {
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontSize: 12,
   },
 });
 
